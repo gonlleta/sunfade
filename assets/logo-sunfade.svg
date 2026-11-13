@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Fondo circular negro estilo parche surf vintage -->
+  <circle cx="100" cy="100" r="96" fill="#121211"/>
+  <circle cx="100" cy="100" r="92" stroke="#F4EFE6" stroke-opacity="0.14" stroke-width="1.5"/>
+
+  <!-- Rayos ondulados del sol (14 rayos flamígeros estilo 90s surf) -->
+  <g fill="#F7F3EB">
+    <path d="M100 16 C105 28, 95 36, 104 49 L95 49 C89 37, 96 28, 100 16 Z"/>
+    <path d="M100 16 C105 28, 95 36, 104 49 L95 49 C89 37, 96 28, 100 16 Z" transform="rotate(25.71 100 100)"/>
+    <path d="M100 16 C105 28, 95 36, 104 49 L95 49 C89 37, 96 28, 100 16 Z" transform="rotate(51.43 100 100)"/>
+    <path d="M100 16 C105 28, 95 36, 104 49 L95 49 C89 37, 96 28, 100 16 Z" transform="rotate(77.14 100 100)"/>
+    <path d="M100 16 C105 28, 95 36, 104 49 L95 49 C89 37, 96 28, 100 16 Z" transform="rotate(102.86 100 100)"/>
+    <path d="M100 16 C105 28, 95 36, 104 49 L95 49 C89 37, 96 28, 100 16 Z" transform="rotate(128.57 100 100)"/>
+    <path d="M100 16 C105 28, 95 36, 104 49 L95 49 C89 37, 96 28, 100 16 Z" transform="rotate(154.29 100 100)"/>
+    <path d="M100 16 C105 28, 95 36, 104 49 L95 49 C89 37, 96 28, 100 16 Z" transform="rotate(180 100 100)"/>
+    <path d="M100 16 C105 28, 95 36, 104 49 L95 49 C89 37, 96 28, 100 16 Z" transform="rotate(205.71 100 100)"/>
+    <path d="M100 16 C105 28, 95 36, 104 49 L95 49 C89 37, 96 28, 100 16 Z" transform="rotate(231.43 100 100)"/>
+    <path d="M100 16 C105 28, 95 36, 104 49 L95 49 C89 37, 96 28, 100 16 Z" transform="rotate(257.14 100 100)"/>
+    <path d="M100 16 C105 28, 95 36, 104 49 L95 49 C89 37, 96 28, 100 16 Z" transform="rotate(282.86 100 100)"/>
+    <path d="M100 16 C105 28, 95 36, 104 49 L95 49 C89 37, 96 28, 100 16 Z" transform="rotate(308.57 100 100)"/>
+    <path d="M100 16 C105 28, 95 36, 104 49 L95 49 C89 37, 96 28, 100 16 Z" transform="rotate(334.29 100 100)"/>
+  </g>
+
+  <!-- Anillo central del sol -->
+  <circle cx="100" cy="100" r="48" fill="#121211" stroke="#F7F3EB" stroke-width="8.5"/>
+
+  <!-- Letra 'S' retro surf en el centro -->
+  <path d="M114 81 C114 73, 106 69, 98 69 C88 69, 81 75, 81 84 C81 93, 89 96, 99 99 C108 102, 113 105, 113 113 C113 121, 106 126, 97 126 C88 126, 82 121, 82 114"
+        stroke="#F7F3EB" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="114" cy="81" r="4.5" fill="#F7F3EB"/>
+  <circle cx="82" cy="114" r="4.5" fill="#F7F3EB"/>
+</svg>
+
