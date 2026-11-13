@@ -1074,6 +1074,77 @@ img {
 }
 
 /* ==========================================================================
+   POLÍTICAS DE COMPRA VINTAGE & ENVÍOS
+   ========================================================================== */
+.policies-section {
+  padding: 4rem 0 1.5rem;
+}
+
+.policies-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.35rem;
+  margin-top: 1.6rem;
+}
+
+.policy-card {
+  background: var(--bg-cream);
+  border: var(--border);
+  border-radius: var(--radius-md);
+  padding: 1.45rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  position: relative;
+}
+
+.policy-icon-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  align-self: flex-start;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.28rem 0.68rem;
+  border-radius: 6px;
+  border: 1.5px solid var(--ink);
+  background: var(--mustard);
+}
+
+.policy-icon-tag.ocean {
+  background: #D5ECFA;
+  color: var(--ocean-deep);
+}
+
+.policy-icon-tag.coral {
+  background: #FCE3DC;
+  color: #9E2E13;
+}
+
+.policy-card h3 {
+  font-size: 1.1rem;
+  line-height: 1.25;
+}
+
+.policy-card p {
+  font-size: 0.9rem;
+  color: var(--ink-muted);
+}
+
+.policy-drawer-notice {
+  background: #FFF6DF;
+  border: 1px dashed var(--ink);
+  border-radius: 9px;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  line-height: 1.38;
+}
+
+/* ==========================================================================
    FAQ SECTION
    ========================================================================== */
 .faq-section {
@@ -1486,7 +1557,8 @@ img {
   .products-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  .steps-grid {
+  .steps-grid,
+  .policies-grid {
     grid-template-columns: 1fr;
   }
   .hero-poster-card {

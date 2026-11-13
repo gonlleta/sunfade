@@ -2,8 +2,8 @@
  * ============================================================================
  * CONFIGURACIÓN Y CATÁLOGO DE SUNFADE SUPPLY (@sunfadesupply_)
  * ============================================================================
- * Editá este archivo para actualizar tus datos de contacto, anunciar un nuevo
- * Supply Drop, agregar boardshorts o marcar prendas como vendidas (available: false).
+ * Editá este archivo para anunciar un nuevo Supply Drop, agregar boardshorts,
+ * cambiar precios o marcar prendas como vendidas (available: false).
  */
 
 window.SUNFADE_CONFIG = {
@@ -14,12 +14,8 @@ window.SUNFADE_CONFIG = {
   instagramUrl: "https://www.instagram.com/sunfadesupply_/",
   instagramHandle: "@sunfadesupply_",
 
-  // Link real de tu comunidad VIP de WhatsApp (tomado de tu bio de IG)
+  // Link oficial de tu comunidad VIP de WhatsApp (tomado de tu bio de IG)
   whatsappGroupUrl: "https://chat.whatsapp.com/GnnWDGGS0SA68nL9LktSLN",
-
-  // Colocá acá tu número de WhatsApp con código de país (ej: "5493435000000")
-  // Si queda vacío (""), el botón permite copiar el pedido listo y abrir IG o WhatsApp Web
-  whatsappPhone: "",
 
   // Configuración del Drop actual y descuento por transferencia
   currentDrop: "SUPPLY DROP #001",

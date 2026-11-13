@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * SUNFADE SUPPLY — LÓGICA DE CATÁLOGO, FILTROS Y RESERVA POR WHATSAPP
+ * SUNFADE SUPPLY — LÓGICA DE CATÁLOGO, LINKS DIRECTOS Y RESERVAS
  * ============================================================================
  */
 
@@ -28,7 +28,7 @@
   const quickviewModalEl = document.getElementById("quickviewModal");
   const quickviewContentEl = document.getElementById("quickviewContent");
   const sizeGuideModalEl = document.getElementById("sizeGuideModal");
-  const orderFallbackModalEl = document.getElementById("orderFallbackModal");
+  const orderConfirmModalEl = document.getElementById("orderConfirmModal");
   const orderPreviewTextEl = document.getElementById("orderPreviewText");
   const bagDrawerEl = document.getElementById("bagDrawer");
   const bagItemsContainerEl = document.getElementById("bagItemsContainer");
@@ -51,7 +51,6 @@
       const raw = localStorage.getItem("sunfade_bag_v1");
       if (!raw) return [];
       const parsed = JSON.parse(raw);
-      // Filtrar solo prendas que sigan existiendo y disponibles
       return Array.isArray(parsed) ? parsed : [];
     } catch (_) {
       return [];
@@ -71,7 +70,46 @@
     clearTimeout(showToast._timer);
     showToast._timer = setTimeout(() => {
       toastEl.classList.remove("show");
-    }, 2800);
+    }, 2900);
+  }
+
+  // Construcción y copiado de Link Directo (?prenda=SF-001)
+  function getProductDeepLink(productId) {
+    const base = window.location.origin && window.location.origin !== "null"
+      ? window.location.origin + window.location.pathname
+      : window.location.href.split("?")[0].split("#")[0];
+    return `${base}?prenda=${encodeURIComponent(productId)}`;
+  }
+
+  function copyProductLink(productId) {
+    const item = products.find((p) => p.id === productId);
+    if (!item) return;
+    const url = getProductDeepLink(item.id);
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard
+        .writeText(url)
+        .then(() => {
+          showToast(`🔗 Link directo copiado (${item.id})`);
+        })
+        .catch(() => {
+          prompt("Copiá el link directo a esta prenda:", url);
+        });
+    } else {
+      prompt("Copiá el link directo a esta prenda:", url);
+    }
+  }
+
+  function setUrlPrendaParam(productId) {
+    try {
+      const url = new URL(window.location.href);
+      if (productId) {
+        url.searchParams.set("prenda", productId);
+      } else {
+        url.searchParams.delete("prenda");
+      }
+      window.history.replaceState({}, "", url.toString());
+    } catch (_) {}
   }
 
   // Inicializar marcas dinámicamente
@@ -96,7 +134,6 @@
         return true;
       })
       .sort((a, b) => {
-        // Siempre mostrar disponibles antes que Sold Out salvo filtro específico
         if (a.available !== b.available && state.availability === "all") {
           return a.available ? -1 : 1;
         }
@@ -179,9 +216,17 @@
 
                 <div class="card-actions">
                   <button
+                    class="icon-btn js-copy-link"
+                    data-id="${item.id}"
+                    title="Copiar link directo a esta prenda"
+                    aria-label="Copiar link directo de ${item.name}"
+                  >
+                    🔗
+                  </button>
+                  <button
                     class="icon-btn js-open-quickview"
                     data-id="${item.id}"
-                    title="Ver ficha y detalles"
+                    title="Ver ficha completa"
                     aria-label="Ver detalles de ${item.name}"
                   >
                     🔍
@@ -243,7 +288,6 @@
       .map((id) => products.find((p) => p.id === id && p.available))
       .filter(Boolean);
 
-    // Sincronizar IDs limpios
     if (selectedItems.length !== state.bagIds.length) {
       state.bagIds = selectedItems.map((i) => i.id);
       saveBagToStorage();
@@ -265,7 +309,7 @@
     if (bagTransferNoteEl) {
       bagTransferNoteEl.textContent =
         isTransfer && subtotal > 0
-          ? `Incluye ${config.transferDiscountPercent}% OFF abonando por transferencia (Precio lista: ${formatARS(subtotal)})`
+          ? `Incluye ${config.transferDiscountPercent}% OFF abonando por transferencia (Lista: ${formatARS(subtotal)})`
           : "Seleccioná transferencia para obtener 10% OFF";
     }
 
@@ -276,7 +320,7 @@
         <div style="text-align:center; padding: 2.2rem 0.5rem; color: var(--ink-muted);">
           <p style="font-size: 2rem; margin-bottom: 0.4rem;">🌊</p>
           <p style="font-weight:700; color:var(--ink); margin-bottom:0.35rem;">Tu selección está vacía</p>
-          <p style="font-size:0.86rem;">Elegí tus boardshorts favoritos del drop para armar tu reserva directa por WhatsApp.</p>
+          <p style="font-size:0.86rem;">Elegí tus boardshorts favoritos del drop para generar tu pedido listo para enviar.</p>
         </div>
       `;
       return;
@@ -299,9 +343,11 @@
       .join("");
   }
 
-  // Modal de Vista Rápida
+  // Modal de Vista Rápida (sincronizado con ?prenda=ID)
   function openQuickView(productId) {
-    const item = products.find((p) => p.id === productId);
+    const item = products.find(
+      (p) => p.id.toLowerCase() === String(productId || "").toLowerCase()
+    );
     if (!item) return;
 
     const inBag = state.bagIds.includes(item.id);
@@ -313,11 +359,22 @@
           <img src="${item.image}" alt="${item.name}" />
         </div>
         <div class="quickview-details">
-          <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
-            <span class="badge-chip ${item.available ? "highlight" : "sold"}">
-              ${item.available ? item.badge : "SOLD OUT"}
-            </span>
-            <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--ink-muted);">${item.code}</span>
+          <div style="display:flex; gap:0.5rem; align-items:center; justify-content:space-between; flex-wrap:wrap; padding-right:2rem;">
+            <div style="display:flex; gap:0.5rem; align-items:center;">
+              <span class="badge-chip ${item.available ? "highlight" : "sold"}">
+                ${item.available ? item.badge : "SOLD OUT"}
+              </span>
+              <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--ink-muted);">${item.code}</span>
+            </div>
+            <button
+              type="button"
+              class="chip js-copy-link"
+              data-id="${item.id}"
+              style="font-family:var(--font-mono); font-size:0.72rem;"
+              title="Copiar link directo a esta prenda"
+            >
+              🔗 Link (${item.id})
+            </button>
           </div>
 
           <h2 style="font-size:1.45rem; line-height:1.15;">${item.name}</h2>
@@ -341,10 +398,14 @@
             <div><strong>Material:</strong> ${item.fabric}</div>
           </div>
 
+          <p style="font-size:0.76rem; color:var(--ink-muted);">
+            ⚡ <strong>Pieza única 1 de 1:</strong> Sin cambio por talle. Se reserva únicamente abonando por transferencia o seña.
+          </p>
+
           ${
             item.available
               ? `
-                <div style="display:grid; gap:0.55rem; margin-top:0.35rem;">
+                <div style="display:grid; gap:0.55rem; margin-top:0.2rem;">
                   <button class="btn btn-whatsapp js-direct-reserve" data-id="${item.id}">
                     💬 Quiero reservar esta prenda ahora
                   </button>
@@ -363,47 +424,45 @@
       </div>
     `;
 
+    setUrlPrendaParam(item.id);
     openModal(quickviewModalEl);
   }
 
-  // Construcción de mensaje y envío a WhatsApp
+  // Construcción de mensaje de pedido
   function buildOrderMessage(items, customerName, customerCity, shippingMethod, paymentMethod) {
     const isTransfer = paymentMethod.includes("Transferencia");
     const subtotal = items.reduce((acc, i) => acc + i.price, 0);
     const total = isTransfer ? getTransferPrice(subtotal) : subtotal;
 
     const lines = [
-      `🌊 *¡Hola Sunfade Supply!* Quiero reservar del catálogo web:`,
+      `🌊 ¡Hola Sunfade Supply! Quiero reservar del catálogo web:`,
       ``
     ];
 
     items.forEach((item, index) => {
       lines.push(
-        `${index + 1}. *${item.name}* [${item.id}] — Talle ${item.sizeLabel} (${item.waistCm}x${item.lengthCm}cm) · ${formatARS(item.price)}`
+        `${index + 1}. ${item.name} [${item.id}] — Talle ${item.sizeLabel} (${item.waistCm}x${item.lengthCm}cm) · ${formatARS(item.price)}`
       );
+      lines.push(`   🔗 ${getProductDeepLink(item.id)}`);
     });
 
     lines.push(``);
-    if (customerName) lines.push(`👤 *Nombre:* ${customerName}`);
-    if (customerCity) lines.push(`📍 *Localidad:* ${customerCity}`);
-    lines.push(`📦 *Entrega:* ${shippingMethod}`);
-    lines.push(`💳 *Pago:* ${paymentMethod}`);
-    lines.push(`💰 *Total estimado:* ${formatARS(total)}${isTransfer ? ` (con ${config.transferDiscountPercent}% OFF transf.)` : ""}`);
+    if (customerName) lines.push(`👤 Nombre: ${customerName}`);
+    if (customerCity) lines.push(`📍 Localidad: ${customerCity}`);
+    lines.push(`📦 Entrega: ${shippingMethod}`);
+    lines.push(`💳 Pago: ${paymentMethod}`);
+    lines.push(
+      `💰 Total estimado: ${formatARS(total)}${
+        isTransfer ? ` (con ${config.transferDiscountPercent}% OFF transf.)` : ""
+      }`
+    );
     lines.push(``);
-    lines.push(`¿Sigue disponible para coordinar? ¡Gracias! 🌞`);
+    lines.push(`¿Sigue disponible para pasarme el alias y señar/transferir ahora? ¡Gracias! 🌞`);
 
     return lines.join("\n");
   }
 
   function dispatchOrder(message) {
-    const cleanPhone = (config.whatsappPhone || "").replace(/\D/g, "");
-    if (cleanPhone.length >= 10) {
-      const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
-      window.open(waUrl, "_blank", "noopener");
-      return;
-    }
-
-    // Si aún no cargaron teléfono directo en products.js, copiamos el pedido y ofrecemos enviar por IG / WhatsApp
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(message).catch(() => {});
     }
@@ -411,7 +470,7 @@
       orderPreviewTextEl.value = message;
     }
     closeAllOverlays();
-    openModal(orderFallbackModalEl);
+    openModal(orderConfirmModalEl);
   }
 
   // Helpers de Modals y Drawer
@@ -433,14 +492,34 @@
     backdropEl.classList.remove("open");
     quickviewModalEl.classList.remove("open");
     sizeGuideModalEl.classList.remove("open");
-    orderFallbackModalEl.classList.remove("open");
+    orderConfirmModalEl.classList.remove("open");
     bagDrawerEl.classList.remove("open");
     document.body.style.overflow = "";
+    setUrlPrendaParam(null);
+  }
+
+  // Detectar ?prenda=SF-001 al entrar desde Instagram Stories o WhatsApp
+  function checkInitialDeepLink() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const prendaId = params.get("prenda");
+      if (!prendaId) return;
+
+      const found = products.find(
+        (p) => p.id.toLowerCase() === prendaId.trim().toLowerCase()
+      );
+      if (found) {
+        const catalogSection = document.getElementById("catalogo");
+        if (catalogSection) {
+          catalogSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        openQuickView(found.id);
+      }
+    } catch (_) {}
   }
 
   // Event Listeners globales
   function bindEvents() {
-    // Chips disponibilidad
     document.querySelectorAll("[data-filter-availability]").forEach((btn) => {
       btn.addEventListener("click", () => {
         state.availability = btn.dataset.filterAvailability;
@@ -451,7 +530,6 @@
       });
     });
 
-    // Chips talle
     document.querySelectorAll("[data-filter-size]").forEach((btn) => {
       btn.addEventListener("click", () => {
         state.size = btn.dataset.filterSize;
@@ -462,7 +540,6 @@
       });
     });
 
-    // Selects marca y orden
     brandSelectEl.addEventListener("change", (e) => {
       state.brand = e.target.value;
       renderCatalog();
@@ -473,8 +550,14 @@
       renderCatalog();
     });
 
-    // Delegación en catálogo, modales y drawer
     document.addEventListener("click", (e) => {
+      const copyLinkTrigger = e.target.closest(".js-copy-link");
+      if (copyLinkTrigger) {
+        e.stopPropagation();
+        copyProductLink(copyLinkTrigger.dataset.id);
+        return;
+      }
+
       const qvTrigger = e.target.closest(".js-open-quickview");
       if (qvTrigger) {
         openQuickView(qvTrigger.dataset.id);
@@ -519,6 +602,7 @@
       }
 
       if (e.target.closest(".js-open-size-guide")) {
+        e.preventDefault();
         closeAllOverlays();
         openModal(sizeGuideModalEl);
         return;
@@ -529,13 +613,11 @@
       }
     });
 
-    // Cambio método de pago actualiza descuento en vivo
     const paymentSelect = document.getElementById("checkoutPayment");
     if (paymentSelect) {
       paymentSelect.addEventListener("change", updateBagUI);
     }
 
-    // Envío de reserva desde el drawer
     const checkoutForm = document.getElementById("whatsappCheckoutForm");
     if (checkoutForm) {
       checkoutForm.addEventListener("submit", (e) => {
@@ -559,7 +641,6 @@
       });
     }
 
-    // Copiar pedido manual en el modal fallback
     const copyOrderBtn = document.getElementById("copyOrderBtn");
     if (copyOrderBtn) {
       copyOrderBtn.addEventListener("click", () => {
@@ -571,7 +652,6 @@
       });
     }
 
-    // Tecla Escape cierra modales
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") closeAllOverlays();
     });
@@ -582,5 +662,5 @@
   renderCatalog();
   updateBagUI();
   bindEvents();
+  checkInitialDeepLink();
 })();
-
